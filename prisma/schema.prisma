@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  WARDEN
+}
+
+model User {
+  id       String   @id @default(cuid())
+  loginId  String   @unique
+  password String
+  role     Role     @default(STUDENT)
+  student  Student?
+}
+
+model Student {
+  id          String    @id @default(cuid())
+  name        String
+  roomNo      String
+  phone       String?
+  monthlyRent Int
+  joinDate    DateTime
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  payments    Payment[]
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  amount    Int
+  month     Int
+  year      Int
+  datePaid  DateTime @default(now())
+  createdAt DateTime @default(now())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}
