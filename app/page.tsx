@@ -27,14 +27,14 @@ export default function Home() {
 
         <div className="flex flex-col gap-3">
           <Link
-            href="/login?role=warden"
+            href="/login/warden"
             className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
           >
             <ShieldCheck size={16} />
             Login as Warden
           </Link>
           <Link
-            href="/login?role=student"
+            href="/login/student"
             className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-900 text-sm font-medium px-4 py-2.5 rounded-lg border border-slate-300 transition"
           >
             <GraduationCap size={16} />

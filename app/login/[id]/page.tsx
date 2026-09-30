@@ -1,11 +1,17 @@
 "use client";
 
 import { Building2, LogIn } from "lucide-react";
-import { useState } from "react";
+import { JSX, use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-export default function Login() {
+export default function Login({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): JSX.Element {
+  const role = use(params).id;
+
   const [loginId, setLoginId] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -57,7 +63,9 @@ export default function Login() {
               onChange={(e) => setLoginId(e.target.value)}
               required
               className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
-              placeholder="e.g. room12-ali"
+              placeholder={
+                role === "warden" ? "Enter warden ID" : "Enter student ID"
+              }
             />
           </div>
 
