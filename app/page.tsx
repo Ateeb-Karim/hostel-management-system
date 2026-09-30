@@ -43,7 +43,10 @@ export default function Home() {
         </div>
 
         <p className="mt-6 pt-6 border-t border-slate-100 text-xs text-center text-slate-400">
-          Don't have a login? Contact the warden
+          Don't have a login?{" "}
+          <Link href="/create-account" className="text-blue-600">
+            Click here to create an account
+          </Link>
         </p>
       </div>
     </main>

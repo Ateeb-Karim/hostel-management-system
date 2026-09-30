@@ -26,7 +26,7 @@ export default function Login({
     const response = await signIn("Credentials", {
       loginId,
       password,
-
+      role,
       redirect: false,
     });
 
@@ -35,7 +35,7 @@ export default function Login({
     if (response?.error) {
       setError(response?.error || "Invalid credentials");
     } else {
-      router.push("/dashboard");
+      router.push(`/${role}/dashboard`);
     }
   };
 
