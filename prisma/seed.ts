@@ -28,7 +28,7 @@ async function main() {
           roomNo: "12",
           phone: "03001234567",
           monthlyRent: 8000,
-          joinDate: new Date("2026-01-01"),
+          joinDate: new Date(),
         },
       },
     },
