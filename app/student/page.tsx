@@ -3,11 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { calculateRentStatus } from "@/lib/rent";
+import { AlertCircle, Check, User } from "lucide-react";
 
 export default async function StudentPage() {
   const session = await getServerSession(authOptions);
 
-  if (session?.user.role !== "student") {
+  if (session?.user?.role !== "STUDENT") {
     redirect("/login");
   }
 
@@ -27,11 +28,102 @@ export default async function StudentPage() {
   const rentStatus = calculateRentStatus(student, student.payments);
 
   return (
-    <div>
-      <h1>StudentDashboard {student.name}</h1>
-      <p>Monthly Rent: {student.monthlyRent}</p>
-      <p>Join Date: {student.joinDate.toDateString()}</p>
-      <p>Rent Status: {rentStatus.status}</p>
-    </div>
+    <main className="min-h-screen w-full bg-slate-50 px-4 py-10 flex justify-center">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div className="flex items-center gap-4 pb-5 border-b border-slate-100 mb-5">
+          <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
+            <User size={28} className="text-slate-400" />
+          </div>
+          <div>
+            <p className="font-medium text-base text-slate-900">Ali Raza</p>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Room 12 · ID room12-ali
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <p className="text-xs text-slate-400">Renting since</p>
+            <p className="text-sm font-medium text-slate-800 mt-0.5">
+              Jan 2026
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-slate-400">Monthly rent</p>
+            <p className="text-sm font-medium text-slate-800 mt-0.5">
+              Rs. 8,000
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-red-50 rounded-lg px-4 py-3 flex justify-between items-center mb-5">
+          <div>
+            <p className="text-xs text-red-600">Remaining balance</p>
+            <p className="text-xl font-medium text-red-600 mt-0.5">
+              Rs. 11,000
+            </p>
+          </div>
+          <AlertCircle size={22} className="text-red-600" />
+        </div>
+
+        <p className="text-sm font-medium text-slate-600 mb-2.5">
+          Month-by-month status
+        </p>
+        <div className="flex flex-col gap-1.5">
+          {[
+            { month: "January 2026", status: "paid" },
+            { month: "February 2026", status: "paid" },
+            {
+              month: "March 2026",
+              status: "partial",
+              detail: "Rs. 3,000 of 8,000",
+            },
+            { month: "April 2026", status: "unpaid" },
+            { month: "September 2026", status: "unpaid" },
+          ].map((row) => (
+            <div
+              key={row.month}
+              className={`flex justify-between items-center px-3 py-2.5 rounded-lg ${
+                row.status === "paid"
+                  ? "bg-green-500"
+                  : row.status === "partial"
+                    ? "bg-amber-500"
+                    : "bg-slate-500"
+              }`}
+            >
+              <span
+                className={`text-sm ${
+                  row.status === "paid"
+                    ? "text-black"
+                    : row.status === "partial"
+                      ? "text-black"
+                      : "text-black"
+                }`}
+              >
+                {row.month}
+              </span>
+              <span
+                className={`text-xs font-medium flex items-center gap-1 ${
+                  row.status === "paid"
+                    ? "text-black"
+                    : row.status === "partial"
+                      ? "text-black"
+                      : "text-black"
+                }`}
+              >
+                {row.status === "paid" && (
+                  <>
+                    <Check size={14} /> Paid
+                  </>
+                )}
+                {row.status === "partial" && `Partial · ${row.detail}`}
+                {row.status === "unpaid" && "Unpaid"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 }

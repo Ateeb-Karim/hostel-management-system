@@ -38,7 +38,6 @@ export default function Login({
     }
 
     const session = await getSession();
-    console.log(session);
     setLoading(false);
 
     if (session?.user?.role === "WARDEN") {
