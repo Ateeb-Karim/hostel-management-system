@@ -3,14 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { calculateRentStatus } from "@/lib/rent";
-import { use } from "react";
 
-export default async function StudentPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const role = use(params).id;
+export default async function StudentPage() {
   const session = await getServerSession(authOptions);
 
   if (session?.user.role !== "student") {
