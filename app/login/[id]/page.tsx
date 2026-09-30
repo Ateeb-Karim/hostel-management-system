@@ -3,9 +3,7 @@
 import { Building2, Eye, EyeOff, Loader2, LogIn } from "lucide-react";
 import { JSX, use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { error } from "console";
+import { signIn, getSession } from "next-auth/react";
 
 export default function Login({
   params,
@@ -30,16 +28,23 @@ export default function Login({
     const response = await signIn("credentials", {
       loginId,
       password,
-      role,
       redirect: false,
     });
 
+    if (response?.error) {
+      setLoading(false);
+      setError("Invalid login ID or password");
+      return;
+    }
+
+    const session = await getSession();
+    console.log(session);
     setLoading(false);
 
-    if (response?.error) {
-      setError(response?.error || "Invalid credentials");
+    if (session?.user?.role === "WARDEN") {
+      router.push("/warden");
     } else {
-      role === "warden" ? router.push("/warden") : router.push("/student");
+      router.push("/student");
     }
   };
 
@@ -53,7 +58,9 @@ export default function Login({
           <h1 className="text-xl font-semibold text-slate-900">
             River Boys Hostel
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Sign in to your account</p>
+          <p className="text-sm text-slate-500 mt-1">
+            {role === "warden" ? "Warden sign in" : "Student sign in"}
+          </p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -66,7 +73,7 @@ export default function Login({
               value={loginId}
               onChange={(e) => setLoginId(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-black outline-none transition-all focus:ring-2 focus:ring-slate-900"
               placeholder={
                 role === "warden" ? "Enter warden ID" : "Enter student ID"
               }
@@ -80,22 +87,16 @@ export default function Login({
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className={`w-full rounded-lg border ${
-                  error
-                    ? "border-red-500 focus:ring-red-500/20"
-                    : "border-gray-700 focus:ring-blue-500/20"
-                } px-3 py-2.5 text-sm text-black outline-none transition-all focus:ring-2`}
                 required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-10 text-sm text-black outline-none transition-all focus:ring-2 focus:ring-slate-900"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition-colors hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -114,27 +115,19 @@ export default function Login({
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition disabled:opacity-60"
           >
-            {!loading && <LogIn size={16} />}
-            {!loading && "Sign in"}
-            {loading && <Loader2 size={16} className="animate-spin" />}
-            {loading && "Signing in..."}
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn size={16} />
+                Sign in
+              </>
+            )}
           </button>
         </form>
-
-        <div className="flex gap-4 pt-4">
-          <Link
-            href="/login/student"
-            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
-          >
-            Student
-          </Link>
-          <Link
-            href="/login/warden"
-            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
-          >
-            Warden
-          </Link>
-        </div>
 
         <p className="mt-6 pt-6 border-t border-slate-100 text-xs text-center text-slate-400">
           Don't have a login? Contact the warden.
