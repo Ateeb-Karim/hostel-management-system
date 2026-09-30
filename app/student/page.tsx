@@ -39,7 +39,7 @@ export default async function StudentPage() {
               {student.name}
             </p>
             <p className="text-sm text-slate-500 mt-0.5">
-              Room · ID {student.id}
+              Room · {student.roomNo}
             </p>
           </div>
         </div>
