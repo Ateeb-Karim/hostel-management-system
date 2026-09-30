@@ -1,60 +1,73 @@
 "use client";
 import { UserPlus } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
-export default function CreateAccount() {
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [role, setRole] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+export default function AddStudentPage() {
+  const [name, setName] = useState("");
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
+  const [roomNo, setRoomNo] = useState("");
+  const [phone, setPhone] = useState("");
+  const [monthlyRent, setMonthlyRent] = useState("");
+  const [joinDate, setJoinDate] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/creating-account", {
+      const res = await fetch("/api/students", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password, role }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          loginId,
+          password,
+          roomNo,
+          phone,
+          monthlyRent: Number(monthlyRent),
+          joinDate,
+        }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create account");
+        const data = await res.json();
+        throw new Error(data.message || "Failed to add student");
       }
 
       setName("");
-      setEmail("");
+      setLoginId("");
       setPassword("");
-      setConfirmPassword("");
-      setRole("");
-
-      setError("Account created successfully");
-    } catch (error) {
-      setError("Failed to create account");
+      setRoomNo("");
+      setPhone("");
+      setMonthlyRent("");
+      setJoinDate("");
+      setSuccess("Student added successfully");
+    } catch (err: any) {
+      setError(err.message || "Failed to add student");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-slate-900">
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 max-w-md w-full">
+    <main className="min-h-screen w-full flex flex-col justify-center items-center bg-slate-50 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
         <header className="flex flex-col items-center text-center mb-6">
           <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
             <UserPlus size={24} className="text-blue-600" />
           </div>
           <h1 className="text-xl font-semibold text-slate-900">
-            Create New Account
+            Add New Student
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Join the network</p>
+          <p className="text-sm text-slate-500 mt-1">
+            Create a login for a new tenant
+          </p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -67,67 +80,93 @@ export default function CreateAccount() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-              placeholder="John Doe"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+              placeholder="Ali Raza"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Email Address
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Room No.
+              </label>
+              <input
+                type="text"
+                value={roomNo}
+                onChange={(e) => setRoomNo(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                placeholder="12"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Phone
+              </label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                placeholder="03001234567"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Monthly Rent
+              </label>
+              <input
+                type="number"
+                value={monthlyRent}
+                onChange={(e) => setMonthlyRent(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+                placeholder="8000"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Join Date
+              </label>
+              <input
+                type="date"
+                value={joinDate}
+                onChange={(e) => setJoinDate(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100">
+            <label className="block text-sm font-medium text-slate-700 mb-1 mt-2">
+              Login ID
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-              placeholder="[EMAIL_ADDRESS]"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
+              placeholder="room12-ali"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Create Password
+              Temporary Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 text-black"
               placeholder="••••••••"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Select Role
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-            >
-              <option value="">Choose your role...</option>
-              <option value="student">Student</option>
-              <option value="warden">Warden</option>
-            </select>
           </div>
 
           {error && (
@@ -135,27 +174,22 @@ export default function CreateAccount() {
               {error}
             </p>
           )}
+          {success && (
+            <p className="text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+              {success}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition disabled:opacity-60"
           >
             <UserPlus size={16} />
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? "Adding student..." : "Add Student"}
           </button>
         </form>
-
-        <p className="mt-6 pt-6 border-t border-slate-100 text-xs text-center text-slate-400">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-blue-600 hover:text-blue-700"
-          >
-            Sign in here
-          </Link>
-        </p>
       </div>
-    </div>
+    </main>
   );
 }

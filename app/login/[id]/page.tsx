@@ -35,7 +35,8 @@ export default function Login({
     if (response?.error) {
       setError(response?.error || "Invalid credentials");
     } else {
-      router.push(`/${role}/dashboard`);
+      if (role === "warden") router.push(`/dashboard/${role}`);
+      if (role === "student") router.push(`/dashboard/${role}`);
     }
   };
 

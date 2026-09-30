@@ -5,7 +5,7 @@ async function main() {
   const wardenPassword = await bcrypt.hash("warden123", 10);
   const studentPassword = await bcrypt.hash("student123", 10);
 
-  const wardenUser = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { loginId: "warden" },
     update: {},
     create: {
@@ -15,7 +15,7 @@ async function main() {
     },
   });
 
-  const studentUser = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { loginId: "room12-ali" },
     update: {},
     create: {
@@ -33,9 +33,6 @@ async function main() {
       },
     },
   });
-
-  console.log("Seed complete:");
-  console.log({ wardenUser, studentUser });
 }
 
 main()
