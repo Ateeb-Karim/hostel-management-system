@@ -2,7 +2,7 @@ export function calculateRentStatus(
   student: { monthlyRent: number; joinDate: Date },
   payments: { amount: number }[],
 ): {
-  monthsElapsed: number;
+  monthsElapsed: { month: string; status: "paid" | "partial" | "unpaid" }[];
   totalPaid: number;
   totalDue: number;
   remaining: number;
@@ -12,13 +12,45 @@ export function calculateRentStatus(
 
   const totalPaid = payments.reduce((acc, pay) => acc + pay.amount, 0);
 
-  const date = new Date();
-  const totalMonths = date.getFullYear() * 12 + date.getMonth();
-  const joinTotalMonths = joinDate.getFullYear() * 12 + joinDate.getMonth();
+  const today = new Date();
+  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const joinMonth = new Date(joinDate.getFullYear(), joinDate.getMonth(), 1);
 
-  const monthsElapsed = Math.max(totalMonths - joinTotalMonths + 1, 0);
+  const monthsElapsedCount = Math.max(
+    (currentMonth.getFullYear() - joinMonth.getFullYear()) * 12 +
+      (currentMonth.getMonth() - joinMonth.getMonth()) +
+      1,
+    0,
+  );
 
-  const totalDue = monthsElapsed * monthlyRent;
+  let remainingPayments = totalPaid;
+  const monthsElapsed: { month: string; status: "paid" | "partial" | "unpaid" }[] = [];
+
+  for (let index = 0; index < monthsElapsedCount; index += 1) {
+    const monthDate = new Date(
+      joinMonth.getFullYear(),
+      joinMonth.getMonth() + index,
+      1,
+    );
+
+    const paidThisMonth = Math.min(monthlyRent, remainingPayments);
+    remainingPayments = Math.max(remainingPayments - monthlyRent, 0);
+
+    monthsElapsed.push({
+      month: monthDate.toLocaleString("en-US", {
+        month: "short",
+        year: "numeric",
+      }),
+      status:
+        paidThisMonth === monthlyRent
+          ? "paid"
+          : paidThisMonth > 0
+            ? "partial"
+            : "unpaid",
+    });
+  }
+
+  const totalDue = monthsElapsedCount * monthlyRent;
   const remaining = totalDue - totalPaid;
 
   const status: "paid" | "partial" | "pending" | "overpaid" =

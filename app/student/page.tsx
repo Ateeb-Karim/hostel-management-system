@@ -35,9 +35,11 @@ export default async function StudentPage() {
             <User size={28} className="text-slate-400" />
           </div>
           <div>
-            <p className="font-medium text-base text-slate-900">Ali Raza</p>
+            <p className="font-medium text-base text-slate-900">
+              {student.name}
+            </p>
             <p className="text-sm text-slate-500 mt-0.5">
-              Room 12 · ID room12-ali
+              Room · ID {student.id}
             </p>
           </div>
         </div>
@@ -46,7 +48,7 @@ export default async function StudentPage() {
           <div>
             <p className="text-xs text-slate-400">Renting since</p>
             <p className="text-sm font-medium text-slate-800 mt-0.5">
-              Jan 2026
+              {student.joinDate.toDateString()}
             </p>
           </div>
           <div className="text-right">
@@ -61,7 +63,7 @@ export default async function StudentPage() {
           <div>
             <p className="text-xs text-red-600">Remaining balance</p>
             <p className="text-xl font-medium text-red-600 mt-0.5">
-              Rs. 11,000
+              Rs. {rentStatus.remaining}
             </p>
           </div>
           <AlertCircle size={22} className="text-red-600" />
@@ -71,54 +73,44 @@ export default async function StudentPage() {
           Month-by-month status
         </p>
         <div className="flex flex-col gap-1.5">
-          {[
-            { month: "January 2026", status: "paid" },
-            { month: "February 2026", status: "paid" },
-            {
-              month: "March 2026",
-              status: "partial",
-              detail: "Rs. 3,000 of 8,000",
-            },
-            { month: "April 2026", status: "unpaid" },
-            { month: "September 2026", status: "unpaid" },
-          ].map((row) => (
+          {rentStatus.monthsElapsed.map((status) => (
             <div
-              key={row.month}
+              key={status.month}
               className={`flex justify-between items-center px-3 py-2.5 rounded-lg ${
-                row.status === "paid"
+                status.status === "paid"
                   ? "bg-green-500"
-                  : row.status === "partial"
+                  : status.status === "partial"
                     ? "bg-amber-500"
                     : "bg-slate-500"
               }`}
             >
               <span
                 className={`text-sm ${
-                  row.status === "paid"
+                  status.status === "paid"
                     ? "text-black"
-                    : row.status === "partial"
+                    : status.status === "partial"
                       ? "text-black"
                       : "text-black"
                 }`}
               >
-                {row.month}
+                {status.month}
               </span>
               <span
                 className={`text-xs font-medium flex items-center gap-1 ${
-                  row.status === "paid"
+                  status.status === "paid"
                     ? "text-black"
-                    : row.status === "partial"
+                    : status.status === "partial"
                       ? "text-black"
                       : "text-black"
                 }`}
               >
-                {row.status === "paid" && (
+                {status.status === "paid" && (
                   <>
                     <Check size={14} /> Paid
                   </>
                 )}
-                {row.status === "partial" && `Partial · ${row.detail}`}
-                {row.status === "unpaid" && "Unpaid"}
+                {status.status === "partial" && `Partial · ${status.month}`}
+                {status.status === "unpaid" && "Unpaid"}
               </span>
             </div>
           ))}
