@@ -11,20 +11,26 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.loginId || !credentials?.password) return null;
+        if (!credentials?.loginId || !credentials?.password) {
+          return null;
+        }
 
         const user = await prisma.user.findUnique({
           where: { loginId: credentials.loginId },
         });
 
-        if (!user) return null;
+        if (!user) {
+          return null;
+        }
 
         const isValid = await bcrypt.compare(
           credentials.password,
           user.password,
         );
 
-        if (!isValid) return null;
+        if (!isValid) {
+          return null;
+        }
 
         return {
           id: user.id,
@@ -42,16 +48,21 @@ export const authOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.loginId = user.loginId;
       }
       return token;
     },
     async session({ session, token }: any) {
       if (session.user) {
-        session.user.role = token.role;
-        session.user.id = token.id;
+        (session.user as any).role = token.role;
+        (session.user as any).id = token.id;
+        (session.user as any).loginId = token.loginId;
       }
       return session;
     },
+  },
+  pages: {
+    signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
