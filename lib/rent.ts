@@ -24,7 +24,10 @@ export function calculateRentStatus(
   );
 
   let remainingPayments = totalPaid;
-  const monthsElapsed: { month: string; status: "paid" | "partial" | "unpaid" }[] = [];
+  const monthsElapsed: {
+    month: string;
+    status: "paid" | "partial" | "unpaid";
+  }[] = [];
 
   for (let index = 0; index < monthsElapsedCount; index += 1) {
     const monthDate = new Date(
@@ -69,4 +72,74 @@ export function calculateRentStatus(
     remaining,
     status,
   };
+}
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+export function getMonthlyBreakdown(
+  student: { monthlyRent: number; joinDate: Date },
+  payments: { amount: number; month: number; year: number }[],
+) {
+  const { monthlyRent, joinDate } = student;
+  const now = new Date();
+
+  const result: {
+    month: string;
+    monthNum: number;
+    year: number;
+    status: "paid" | "partial" | "unpaid";
+    paidAmount: number;
+    dueAmount: number;
+  }[] = [];
+
+  let year = joinDate.getFullYear();
+  let month = joinDate.getMonth(); // 0-indexed
+
+  const endYear = now.getFullYear();
+  const endMonth = now.getMonth();
+
+  while (year < endYear || (year === endYear && month <= endMonth)) {
+    const paidForThisMonth = payments
+      .filter((p) => p.month === month + 1 && p.year === year)
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    let status: "paid" | "partial" | "unpaid";
+    if (paidForThisMonth >= monthlyRent) {
+      status = "paid";
+    } else if (paidForThisMonth > 0) {
+      status = "partial";
+    } else {
+      status = "unpaid";
+    }
+
+    result.push({
+      month: `${MONTH_NAMES[month]} ${year}`,
+      monthNum: month + 1,
+      year,
+      status,
+      paidAmount: paidForThisMonth,
+      dueAmount: monthlyRent,
+    });
+
+    month++;
+    if (month > 11) {
+      month = 0;
+      year++;
+    }
+  }
+
+  return result;
 }

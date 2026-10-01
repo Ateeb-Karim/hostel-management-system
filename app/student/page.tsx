@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { calculateRentStatus } from "@/lib/rent";
+import { calculateRentStatus, getMonthlyBreakdown } from "@/lib/rent";
 import { AlertCircle, Check, User } from "lucide-react";
 
 export default async function StudentPage() {
@@ -18,6 +18,7 @@ export default async function StudentPage() {
     },
     include: {
       payments: true,
+      user: true,
     },
   });
 
@@ -26,10 +27,11 @@ export default async function StudentPage() {
   }
 
   const rentStatus = calculateRentStatus(student, student.payments);
+  const monthlyBreakdown = getMonthlyBreakdown(student, student.payments);
 
   return (
-    <main className="min-h-screen w-full bg-slate-50 px-4 py-10 flex justify-center">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+    <main className="h-screen w-full bg-slate-50 px-4 py-10 flex justify-center overflow-hidden">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
         <div className="flex items-center gap-4 pb-5 border-b border-slate-100 mb-5">
           <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
             <User size={28} className="text-slate-400" />
@@ -39,7 +41,7 @@ export default async function StudentPage() {
               {student.name}
             </p>
             <p className="text-sm text-slate-500 mt-0.5">
-              Room · {student.roomNo}
+              Room {student.roomNo} · {student.user.loginId}
             </p>
           </div>
         </div>
@@ -54,7 +56,7 @@ export default async function StudentPage() {
           <div className="text-right">
             <p className="text-xs text-slate-400">Monthly rent</p>
             <p className="text-sm font-medium text-slate-800 mt-0.5">
-              Rs. 8,000
+              Rs. {student.monthlyRent}
             </p>
           </div>
         </div>
@@ -72,45 +74,46 @@ export default async function StudentPage() {
         <p className="text-sm font-medium text-slate-600 mb-2.5">
           Month-by-month status
         </p>
-        <div className="flex flex-col gap-1.5">
-          {rentStatus.monthsElapsed.map((status) => (
+        <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 pr-1 min-h-50">
+          {monthlyBreakdown.map((row) => (
             <div
-              key={status.month}
+              key={`${row.year}-${row.monthNum}`}
               className={`flex justify-between items-center px-3 py-2.5 rounded-lg ${
-                status.status === "paid"
-                  ? "bg-green-500"
-                  : status.status === "partial"
-                    ? "bg-amber-500"
-                    : "bg-slate-500"
+                row.status === "paid"
+                  ? "bg-green-50"
+                  : row.status === "partial"
+                    ? "bg-amber-50"
+                    : "bg-slate-50"
               }`}
             >
               <span
                 className={`text-sm ${
-                  status.status === "paid"
-                    ? "text-black"
-                    : status.status === "partial"
-                      ? "text-black"
-                      : "text-black"
+                  row.status === "paid"
+                    ? "text-green-700"
+                    : row.status === "partial"
+                      ? "text-amber-700"
+                      : "text-slate-500"
                 }`}
               >
-                {status.month}
+                {row.month}
               </span>
               <span
                 className={`text-xs font-medium flex items-center gap-1 ${
-                  status.status === "paid"
-                    ? "text-black"
-                    : status.status === "partial"
-                      ? "text-black"
-                      : "text-black"
+                  row.status === "paid"
+                    ? "text-green-700"
+                    : row.status === "partial"
+                      ? "text-amber-700"
+                      : "text-slate-400"
                 }`}
               >
-                {status.status === "paid" && (
+                {row.status === "paid" && (
                   <>
                     <Check size={14} /> Paid
                   </>
                 )}
-                {status.status === "partial" && `Partial · ${status.month}`}
-                {status.status === "unpaid" && "Unpaid"}
+                {row.status === "partial" &&
+                  `Partial · Rs. ${row.paidAmount} of ${row.dueAmount}`}
+                {row.status === "unpaid" && "Unpaid"}
               </span>
             </div>
           ))}

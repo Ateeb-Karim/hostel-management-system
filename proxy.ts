@@ -3,8 +3,6 @@ import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 
 export async function proxy(req: NextRequest) {
-  console.log("PROXY RUNNING:", req.nextUrl.pathname);
-
   const { pathname } = req.nextUrl;
 
   const token = await getToken({
@@ -12,11 +10,7 @@ export async function proxy(req: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  console.log("TOKEN:", token);
-
   const role = token?.role;
-
-  console.log("ROLE:", role);
 
   if (pathname.startsWith("/login")) {
     if (role === "WARDEN") {
