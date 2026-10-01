@@ -1,9 +1,18 @@
 "use client";
 
-import { Building2, Eye, EyeOff, Loader2, LogIn } from "lucide-react";
+import {
+  Building2,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  Loader2,
+  LogIn,
+  ShieldCheck,
+} from "lucide-react";
 import { JSX, use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function Login({
   params,
@@ -127,6 +136,24 @@ export default function Login({
             )}
           </button>
         </form>
+
+        <div className="flex gap-2 w-full mt-5">
+          <Link
+            href="/login/warden"
+            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+          >
+            <ShieldCheck size={16} />
+            Login as Warden
+          </Link>
+
+          <Link
+            href="/login/student"
+            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+          >
+            <GraduationCap size={16} />
+            Login as Student
+          </Link>
+        </div>
 
         <p className="mt-6 pt-6 border-t border-slate-100 text-xs text-center text-slate-400">
           Don't have a login? Contact the warden.
