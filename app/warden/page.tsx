@@ -1,4 +1,5 @@
 import { Plus, Search, User } from "lucide-react";
+import Link from "next/link";
 
 export default function WardenPage() {
   const students = [
@@ -40,10 +41,13 @@ export default function WardenPage() {
           </p>
           <p className="text-sm text-slate-500 mt-0.5">Warden dashboard</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition">
+        <Link
+          href="/warden/add-student"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition cursor-pointer"
+        >
           <Plus size={16} />
           Add student
-        </button>
+        </Link>
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-1 bg-slate-100 rounded-xl p-4">
