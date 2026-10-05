@@ -1,30 +1,48 @@
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { calculateRentStatus } from "@/lib/rent";
 import { Plus, Search, User } from "lucide-react";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function WardenPage() {
-  const students = [
-    {
-      name: "Ali Raza",
-      roomNo: "12",
-      rent: 8000,
-      status: "partial",
-      duesRemaining: 3000,
+export default async function WardenPage() {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user?.role !== "WARDEN") redirect("/login");
+
+  const students = await prisma.student.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      payments: true,
+      user: true,
     },
-    {
-      name: "Hassan Khan",
-      roomNo: "7",
-      rent: 7500,
-      status: "paid",
-      duesRemaining: 0,
-    },
-    {
-      name: "Bilal Ahmed",
-      roomNo: "3",
-      rent: 8000,
-      status: "unpaid",
-      duesRemaining: 8000,
-    },
-  ];
+  });
+
+  const studentsWithStatus = students.map((std) => ({
+    ...std,
+    rentStatus: calculateRentStatus(std, std.payments),
+  }));
+
+  const totalStudents = studentsWithStatus.length;
+
+  const fullyPaidCount = studentsWithStatus.filter(
+    (std) => std.rentStatus.status === "paid",
+  ).length;
+
+  const partialCount = studentsWithStatus.filter(
+    (std) => std.rentStatus.status === "partial",
+  ).length;
+
+  const pendingCount = studentsWithStatus.filter(
+    (std) => std.rentStatus.status === "pending",
+  ).length;
+
+  const overpaidCount = studentsWithStatus.filter(
+    (std) => std.rentStatus.status === "overpaid",
+  ).length;
+
+  const pendingDuesCount = partialCount + pendingCount;
 
   const statusStyles = {
     paid: "bg-green-50 text-green-700",
@@ -72,7 +90,7 @@ export default function WardenPage() {
             className="w-full py-2.5 outline-none text-sm bg-transparent"
           />
         </div>
-        <select className="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none">
+        <select className="bg-white border border-slate-300 rounded-lg px-1.5 py-2.5 text-sm text-slate-700 outline-none">
           <option value="all">All students</option>
           <option value="paid">Fully paid</option>
           <option value="partial">Partial</option>
@@ -87,7 +105,7 @@ export default function WardenPage() {
           <p>Status</p>
           <p>Dues remaining</p>
         </div>
-        {students.map((student) => (
+        {/* {students.map((student) => (
           <div
             key={student.name}
             className="grid grid-cols-5 items-center px-5 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition cursor-pointer"
@@ -113,7 +131,7 @@ export default function WardenPage() {
                 : "—"}
             </p>
           </div>
-        ))}
+        ))} */}
       </div>
     </main>
   );
