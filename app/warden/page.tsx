@@ -1,15 +1,18 @@
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { calculateRentStatus } from "@/lib/rent";
 import { Plus, Search, User } from "lucide-react";
-import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import LogoutButton from "../components/logOutBtn";
 
 export default async function WardenPage() {
   const session = await getServerSession(authOptions);
 
-  if (session?.user?.role !== "WARDEN") redirect("/login");
+  if (session?.user?.role !== "WARDEN") {
+    redirect("/login");
+  }
 
   const students = await prisma.student.findMany({
     orderBy: { name: "asc" },
@@ -19,35 +22,32 @@ export default async function WardenPage() {
     },
   });
 
-  const studentsWithStatus = students.map((std) => ({
-    ...std,
-    rentStatus: calculateRentStatus(std, std.payments),
+  const studentsWithStatus = students.map((student) => ({
+    ...student,
+    rentStatus: calculateRentStatus(student, student.payments),
   }));
 
   const totalStudents = studentsWithStatus.length;
 
   const fullyPaidCount = studentsWithStatus.filter(
-    (std) => std.rentStatus.status === "paid",
+    (s) => s.rentStatus.status === "paid",
   ).length;
 
   const partialCount = studentsWithStatus.filter(
-    (std) => std.rentStatus.status === "partial",
+    (s) => s.rentStatus.status === "partial",
   ).length;
 
   const pendingCount = studentsWithStatus.filter(
-    (std) => std.rentStatus.status === "pending",
-  ).length;
-
-  const overpaidCount = studentsWithStatus.filter(
-    (std) => std.rentStatus.status === "overpaid",
+    (s) => s.rentStatus.status === "pending",
   ).length;
 
   const pendingDuesCount = partialCount + pendingCount;
 
-  const statusStyles = {
+  const statusStyles: Record<string, string> = {
     paid: "bg-green-50 text-green-700",
     partial: "bg-amber-50 text-amber-700",
-    unpaid: "bg-red-50 text-red-700",
+    pending: "bg-red-50 text-red-700",
+    overpaid: "bg-blue-50 text-blue-700",
   };
 
   return (
@@ -59,28 +59,39 @@ export default async function WardenPage() {
           </p>
           <p className="text-sm text-slate-500 mt-0.5">Warden dashboard</p>
         </div>
-        <Link
-          href="/warden/add-student"
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition cursor-pointer"
-        >
-          <Plus size={16} />
-          Add student
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/warden/new-student"
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition"
+          >
+            <Plus size={16} />
+            Add student
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
+
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-1 bg-slate-100 rounded-xl p-4">
           <p className="text-xs text-slate-500">Total students</p>
-          <p className="text-2xl font-semibold text-slate-900">60</p>
+          <p className="text-2xl font-semibold text-slate-900">
+            {totalStudents}
+          </p>
         </div>
         <div className="flex flex-col gap-1 bg-slate-100 rounded-xl p-4">
           <p className="text-xs text-slate-500">Fully paid</p>
-          <p className="text-2xl font-semibold text-green-700">42</p>
+          <p className="text-2xl font-semibold text-green-700">
+            {fullyPaidCount}
+          </p>
         </div>
         <div className="flex flex-col gap-1 bg-slate-100 rounded-xl p-4">
           <p className="text-xs text-slate-500">Pending dues</p>
-          <p className="text-2xl font-semibold text-red-700">18</p>
+          <p className="text-2xl font-semibold text-red-700">
+            {pendingDuesCount}
+          </p>
         </div>
       </div>
+
       <div className="flex gap-3 w-full max-w-xl">
         <div className="flex items-center gap-2 bg-white border border-slate-300 rounded-lg px-3 w-full">
           <Search size={16} className="text-slate-400 shrink-0" />
@@ -90,13 +101,14 @@ export default async function WardenPage() {
             className="w-full py-2.5 outline-none text-sm bg-transparent"
           />
         </div>
-        <select className="bg-white border border-slate-300 rounded-lg px-1.5 py-2.5 text-sm text-slate-700 outline-none">
+        <select className="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none">
           <option value="all">All students</option>
           <option value="paid">Fully paid</option>
           <option value="partial">Partial</option>
-          <option value="unpaid">Unpaid</option>
+          <option value="pending">Unpaid</option>
         </select>
       </div>
+
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <div className="grid grid-cols-5 text-xs text-slate-500 px-5 py-3 bg-slate-50 border-b border-slate-200">
           <p>Name</p>
@@ -105,9 +117,17 @@ export default async function WardenPage() {
           <p>Status</p>
           <p>Dues remaining</p>
         </div>
-        {/* {students.map((student) => (
-          <div
-            key={student.name}
+
+        {studentsWithStatus.length === 0 && (
+          <p className="text-sm text-slate-400 px-5 py-6 text-center">
+            No students added yet.
+          </p>
+        )}
+
+        {studentsWithStatus.map((student) => (
+          <Link
+            key={student.id}
+            href={`/warden/student/${student.id}`}
             className="grid grid-cols-5 items-center px-5 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
@@ -118,20 +138,24 @@ export default async function WardenPage() {
             </div>
             <p className="text-sm text-slate-600">{student.roomNo}</p>
             <p className="text-sm text-slate-600">
-              Rs. {student.rent.toLocaleString()}
+              Rs. {student.monthlyRent.toLocaleString()}
             </p>
             <span
-              className={`text-xs font-medium px-2.5 py-1 rounded-full w-fit capitalize ${statusStyles[student.status as keyof typeof statusStyles]}`}
+              className={`text-xs font-medium px-2.5 py-1 rounded-full w-fit capitalize ${
+                statusStyles[student.rentStatus.status]
+              }`}
             >
-              {student.status}
+              {student.rentStatus.status === "pending"
+                ? "unpaid"
+                : student.rentStatus.status}
             </span>
             <p className="text-sm text-slate-600">
-              {student.duesRemaining > 0
-                ? `Rs. ${student.duesRemaining.toLocaleString()}`
+              {student.rentStatus.remaining > 0
+                ? `Rs. ${student.rentStatus.remaining.toLocaleString()}`
                 : "—"}
             </p>
-          </div>
-        ))} */}
+          </Link>
+        ))}
       </div>
     </main>
   );

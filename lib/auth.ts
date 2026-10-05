@@ -9,6 +9,7 @@ export const authOptions = {
       credentials: {
         loginId: { label: "Login ID", type: "text" },
         password: { label: "Password", type: "password" },
+        role: { label: "Role", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.loginId || !credentials?.password) {
@@ -29,6 +30,10 @@ export const authOptions = {
         );
 
         if (!isValid) {
+          return null;
+        }
+
+        if (credentials.role && user.role !== credentials.role.toUpperCase()) {
           return null;
         }
 
