@@ -1,8 +1,9 @@
 "use client";
 
-import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function makeLoginId(name: string, roomNo: string) {
   const firstName = name.trim().split(" ")[0]?.toLowerCase() || "";
@@ -59,16 +60,23 @@ export default function AddStudentPage() {
 
       setSuccess("Student added successfully");
       setTimeout(() => router.push("/warden"), 1000);
-    } catch (err: any) {
-      setError(err.message || "Failed to add student");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Failed to add student");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen w-full flex flex-col justify-center items-center bg-slate-50 px-4">
+    <main className="min-h-screen w-full flex flex-col justify-center items-center bg-slate-50 px-10">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <Link
+          href="/warden"
+          className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition w-fit "
+        >
+          <ArrowLeft size={16} />
+          Back to dashboard
+        </Link>
         <header className="flex flex-col items-center text-center mb-6">
           <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
             <UserPlus size={24} className="text-blue-600" />
