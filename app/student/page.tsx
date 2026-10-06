@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { calculateRentStatus, getMonthlyBreakdown } from "@/lib/rent";
-import { AlertCircle, Check, User } from "lucide-react";
+import { AlertCircle, Check, LogOut, User } from "lucide-react";
+import Link from "next/link";
 
 export default async function StudentPage() {
   const session = await getServerSession(authOptions);
@@ -32,6 +33,13 @@ export default async function StudentPage() {
   return (
     <main className="h-screen w-full bg-slate-50 px-4 py-10 flex justify-center overflow-hidden">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
+        <Link
+          href="/login/student"
+          className="flex flex-row-reverse w-full items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition mb-2"
+        >
+          <LogOut size={16} />
+          logout
+        </Link>
         <div className="flex items-center gap-4 pb-5 border-b border-slate-100 mb-5">
           <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
             <User size={28} className="text-slate-400" />

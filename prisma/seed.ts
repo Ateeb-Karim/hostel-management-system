@@ -13,13 +13,13 @@ async function main() {
       password: wardenPassword,
       role: "WARDEN",
     },
-  });
+  }); 
 
   await prisma.user.upsert({
-    where: { loginId: "room12-ali" },
+    where: { loginId: "aliraza" },
     update: {},
     create: {
-      loginId: "room12-ali",
+      loginId: "aliraza",
       password: studentPassword,
       role: "STUDENT",
       student: {
