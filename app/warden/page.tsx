@@ -3,18 +3,33 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { calculateRentStatus } from "@/lib/rent";
-import { Plus, Search, User } from "lucide-react";
+import { Plus, User } from "lucide-react";
 import Link from "next/link";
 import LogoutButton from "../components/logOutBtn";
+import StudentSearchBar from "../components/studentSearchBar";
 
-export default async function WardenPage() {
+export default async function WardenPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string }>;
+}) {
   const session = await getServerSession(authOptions);
 
   if (session?.user?.role !== "WARDEN") {
     redirect("/login");
   }
 
+  const { q, status } = await searchParams;
+
   const students = await prisma.student.findMany({
+    where: q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { roomNo: { contains: q, mode: "insensitive" } },
+          ],
+        }
+      : undefined,
     orderBy: { name: "asc" },
     include: {
       payments: true,
@@ -22,23 +37,27 @@ export default async function WardenPage() {
     },
   });
 
-  const studentsWithStatus = students.map((student) => ({
-    ...student,
-    rentStatus: calculateRentStatus(student, student.payments),
-  }));
+  const studentsWithStatus = students
+    .map((student) => ({
+      ...student,
+      rentStatus: calculateRentStatus(student, student.payments),
+    }))
+    .filter((student) =>
+      status && status !== "all" ? student.rentStatus.status === status : true,
+    );
 
-  const totalStudents = studentsWithStatus.length;
+  const totalStudents = students.length;
 
-  const fullyPaidCount = studentsWithStatus.filter(
-    (s) => s.rentStatus.status === "paid",
+  const fullyPaidCount = students.filter(
+    (s) => calculateRentStatus(s, s.payments).status === "paid",
   ).length;
 
-  const partialCount = studentsWithStatus.filter(
-    (s) => s.rentStatus.status === "partial",
+  const partialCount = students.filter(
+    (s) => calculateRentStatus(s, s.payments).status === "partial",
   ).length;
 
-  const pendingCount = studentsWithStatus.filter(
-    (s) => s.rentStatus.status === "pending",
+  const pendingCount = students.filter(
+    (s) => calculateRentStatus(s, s.payments).status === "pending",
   ).length;
 
   const pendingDuesCount = partialCount + pendingCount;
@@ -92,22 +111,7 @@ export default async function WardenPage() {
         </div>
       </div>
 
-      <div className="flex gap-3 w-full max-w-xl">
-        <div className="flex items-center gap-2 bg-white border border-slate-300 rounded-lg px-3 w-full">
-          <Search size={16} className="text-slate-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="Search by name or room"
-            className="w-full py-2.5 outline-none text-sm bg-transparent"
-          />
-        </div>
-        <select className="bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none">
-          <option value="all">All students</option>
-          <option value="paid">Fully paid</option>
-          <option value="partial">Partial</option>
-          <option value="pending">Unpaid</option>
-        </select>
-      </div>
+      <StudentSearchBar />
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <div className="grid grid-cols-5 text-xs text-slate-500 px-5 py-3 bg-slate-50 border-b border-slate-200">
@@ -120,7 +124,7 @@ export default async function WardenPage() {
 
         {studentsWithStatus.length === 0 && (
           <p className="text-sm text-slate-400 px-5 py-6 text-center">
-            No students added yet.
+            No students found.
           </p>
         )}
 
