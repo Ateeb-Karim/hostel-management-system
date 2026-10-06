@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 export default function AddPaymentForm({ studentId }: { studentId: string }) {
   const router = useRouter();
@@ -51,14 +49,6 @@ export default function AddPaymentForm({ studentId }: { studentId: string }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Link
-        href="/warden"
-        className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition w-fit"
-      >
-        <ArrowLeft size={16} />
-        Back to dashboard
-      </Link>
-
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-2">
           <div>

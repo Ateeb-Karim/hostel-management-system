@@ -42,7 +42,7 @@ export default function StudentSearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name or room"
-          className="w-full py-2.5 outline-none text-sm bg-transparent text-black"
+          className="w-full text-black py-2.5 outline-none text-sm bg-transparent"
         />
       </div>
       <select
