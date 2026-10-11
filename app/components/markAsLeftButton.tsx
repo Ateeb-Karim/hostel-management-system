@@ -103,7 +103,7 @@ export default function MarkAsLeftButton({
     setError("");
 
     try {
-      const res = await fetch(`api/left-student/${studentId}`, {
+      const res = await fetch(`/api/left-student/${studentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leaveDate: dialog === "leave" ? date : null }),

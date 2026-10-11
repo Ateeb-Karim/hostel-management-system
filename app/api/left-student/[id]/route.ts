@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 const OBJECT_ID = /^[0-9a-fA-F]{24}$/;
+const ONE_DAY = 24 * 60 * 60 * 1000;
 
 export async function PATCH(
   req: Request,
@@ -33,7 +34,7 @@ export async function PATCH(
     if (!body.leaveDate) {
       const reinstated = await prisma.student.update({
         where: { id },
-        data: { leaveDate: null } as  any,
+        data: { leaveDate: null },
       });
       return NextResponse.json(reinstated);
     }
@@ -64,7 +65,7 @@ export async function PATCH(
 
     const updated = await prisma.student.update({
       where: { id },
-      data: { leaveDate } as any,
+      data: { leaveDate },
     });
 
     return NextResponse.json(updated);
