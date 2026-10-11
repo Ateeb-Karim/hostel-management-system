@@ -16,6 +16,7 @@ import AddPaymentForm from "@/app/components/addPaymentForm";
 import PaymentHistory from "@/app/components/paymentHistory";
 import Link from "next/link";
 import DeleteStudentButton from "@/app/components/deleteStudentBtn";
+import ResetPasswordForm from "@/app/components/resetPasswordForm";
 
 const statusBadge: Record<string, string> = {
   paid: "bg-green-100 text-green-700",
@@ -257,6 +258,19 @@ export default async function StudentDetailPage({
                 <PaymentHistory payments={paymentsForClient} />
               </div>
             </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-medium text-slate-600">Reset password</p>
+            <p className="mb-4 mt-0.5 text-sm text-slate-500">
+              Set a new password for{" "}
+              <span className="font-medium text-slate-700">
+                {student.user.loginId}
+              </span>
+              . Students can&apos;t change it themselves, so share the new one
+              with them.
+            </p>
+            <ResetPasswordForm studentId={student.id} />
           </div>
 
           <div className="flex flex-col gap-4 rounded-xl border border-red-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
