@@ -17,6 +17,7 @@ import PaymentHistory from "@/app/components/paymentHistory";
 import Link from "next/link";
 import DeleteStudentButton from "@/app/components/deleteStudentBtn";
 import ResetPasswordForm from "@/app/components/resetPasswordForm";
+import MarkAsLeftButton from "@/app/components/markAsLeftButton";
 
 const statusBadge: Record<string, string> = {
   paid: "bg-green-100 text-green-700",
@@ -134,6 +135,14 @@ export default async function StudentDetailPage({
                     Rs. {rentStatus.remaining.toLocaleString()}
                   </p>
                 </div>
+                <MarkAsLeftButton
+                  studentId={student.id}
+                  studentName={student.name}
+                  joinDate={student.joinDate.toISOString()}
+                  leaveDate={
+                    student.leaveDate ? student.leaveDate.toISOString() : null
+                  }
+                />
                 <Link
                   href={`/warden/student/${student.id}/edit`}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"

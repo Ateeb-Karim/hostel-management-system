@@ -1,5 +1,19 @@
+type RentStudent = {
+  monthlyRent: number;
+  joinDate: Date;
+  leaveDate?: Date | null;
+};
+
+function getBillingEnd(student: RentStudent): Date {
+  const now = new Date();
+  if (student.leaveDate && student.leaveDate < now) {
+    return student.leaveDate;
+  }
+  return now;
+}
+
 export function calculateRentStatus(
-  student: { monthlyRent: number; joinDate: Date },
+  student: RentStudent,
   payments: { amount: number }[],
 ): {
   monthsElapsed: { month: string; status: "paid" | "partial" | "unpaid" }[];
@@ -12,13 +26,17 @@ export function calculateRentStatus(
 
   const totalPaid = payments.reduce((acc, pay) => acc + pay.amount, 0);
 
-  const today = new Date();
-  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const billingEnd = getBillingEnd(student);
+  const lastBilledMonth = new Date(
+    billingEnd.getFullYear(),
+    billingEnd.getMonth(),
+    1,
+  );
   const joinMonth = new Date(joinDate.getFullYear(), joinDate.getMonth(), 1);
 
   const monthsElapsedCount = Math.max(
-    (currentMonth.getFullYear() - joinMonth.getFullYear()) * 12 +
-      (currentMonth.getMonth() - joinMonth.getMonth()) +
+    (lastBilledMonth.getFullYear() - joinMonth.getFullYear()) * 12 +
+      (lastBilledMonth.getMonth() - joinMonth.getMonth()) +
       1,
     0,
   );
@@ -90,11 +108,11 @@ const MONTH_NAMES = [
 ];
 
 export function getMonthlyBreakdown(
-  student: { monthlyRent: number; joinDate: Date },
+  student: RentStudent,
   payments: { amount: number; month: number; year: number }[],
 ) {
   const { monthlyRent, joinDate } = student;
-  const now = new Date();
+  const billingEnd = getBillingEnd(student);
 
   const result: {
     month: string;
@@ -108,8 +126,8 @@ export function getMonthlyBreakdown(
   let year = joinDate.getFullYear();
   let month = joinDate.getMonth(); // 0-indexed
 
-  const endYear = now.getFullYear();
-  const endMonth = now.getMonth();
+  const endYear = billingEnd.getFullYear();
+  const endMonth = billingEnd.getMonth();
 
   while (year < endYear || (year === endYear && month <= endMonth)) {
     const paidForThisMonth = payments
