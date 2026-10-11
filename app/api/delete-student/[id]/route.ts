@@ -100,16 +100,17 @@ export async function DELETE(
 
     await prisma.$transaction([
       prisma.payment.deleteMany({ where: { studentId: id } }),
-      prisma.student.delete({ where: { id } }),
-      prisma.user.delete({ where: { id: student.userId } }),
+      prisma.student.deleteMany({ where: { id } }),
+      prisma.user.deleteMany({ where: { id: student.userId } }),
     ]);
 
     return NextResponse.json({ message: "Student deleted successfully" });
   } catch (error) {
     console.error("Delete student error:", error);
-    return NextResponse.json(
-      { error: "Failed to delete student" },
-      { status: 500 },
-    );
+    const message =
+      process.env.NODE_ENV === "development" && error instanceof Error
+        ? error.message
+        : "Failed to delete student";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
