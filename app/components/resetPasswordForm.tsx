@@ -93,7 +93,7 @@ export default function ResetPasswordForm({
             }}
             placeholder="New password (min. 8 characters)"
             autoComplete="new-password"
-            className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-10 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+            className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-10 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-200"
           />
           <button
             type="button"
