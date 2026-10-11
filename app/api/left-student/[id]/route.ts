@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 const OBJECT_ID = /^[0-9a-fA-F]{24}$/;
-const ONE_DAY = 24 * 60 * 60 * 1000;
 
 export async function PATCH(
   req: Request,
@@ -27,7 +26,6 @@ export async function PATCH(
     const body = await req.json();
 
     const student = await prisma.student.findUnique({ where: { id } });
-    console.log(student);
     if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
@@ -35,7 +33,7 @@ export async function PATCH(
     if (!body.leaveDate) {
       const reinstated = await prisma.student.update({
         where: { id },
-        data: { leaveDate: null },
+        data: { leaveDate: null } as  any,
       });
       return NextResponse.json(reinstated);
     }
@@ -66,7 +64,7 @@ export async function PATCH(
 
     const updated = await prisma.student.update({
       where: { id },
-      data: { leaveDate },
+      data: { leaveDate } as any,
     });
 
     return NextResponse.json(updated);

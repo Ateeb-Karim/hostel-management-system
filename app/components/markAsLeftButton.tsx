@@ -8,8 +8,8 @@ import { AlertTriangle, LogOut, RotateCcw, Loader2 } from "lucide-react";
 type Props = {
   studentId: string;
   studentName: string;
-  joinDate: string; // ISO string
-  leaveDate: string | null; // ISO string, null while the student still lives here
+  joinDate: string;
+  leaveDate: string | null;
 };
 
 const MONTHS = [
@@ -32,14 +32,12 @@ function monthYear(isoOrDate: string) {
   return `${MONTHS[Number(m) - 1]} ${y}`;
 }
 
-// Today's date in the browser's own timezone, as YYYY-MM-DD
 function localToday() {
   return new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
     .toISOString()
     .slice(0, 10);
 }
 
-// Same look as the Edit button next to it
 const actionButtonClass =
   "inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-none";
 
@@ -73,7 +71,6 @@ export default function MarkAsLeftButton({
     setError("");
   }
 
-  // Lock page scroll while the dialog is open and focus the safe button (Cancel)
   useEffect(() => {
     if (!dialog) return;
     const previousOverflow = document.body.style.overflow;
@@ -84,7 +81,6 @@ export default function MarkAsLeftButton({
     };
   }, [dialog]);
 
-  // Escape closes the dialog, except while saving
   useEffect(() => {
     if (!dialog) return;
     function onKeyDown(e: KeyboardEvent) {
@@ -107,7 +103,7 @@ export default function MarkAsLeftButton({
     setError("");
 
     try {
-      const res = await fetch(`/api/students/${studentId}/leave`, {
+      const res = await fetch(`api/left-student/${studentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leaveDate: dialog === "leave" ? date : null }),
