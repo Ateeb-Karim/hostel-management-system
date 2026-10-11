@@ -3,7 +3,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { calculateRentStatus } from "@/lib/rent";
-import { Plus, User, Users, BadgeCheck, Clock, Wallet } from "lucide-react";
+import {
+  Plus,
+  User,
+  Users,
+  BadgeCheck,
+  Clock,
+  Wallet,
+  Receipt,
+} from "lucide-react";
 import Link from "next/link";
 import LogoutButton from "../components/logOutBtn";
 import StudentSearchBar from "../components/studentSearchBar";
@@ -108,7 +116,14 @@ export default async function WardenPage({
             </p>
             <p className="mt-0.5 text-sm text-slate-500">Warden dashboard</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/warden/payments"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:flex-none"
+            >
+              <Receipt size={16} />
+              Payments
+            </Link>
             <Link
               href="/warden/new-student"
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 sm:flex-none"
