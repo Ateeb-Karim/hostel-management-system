@@ -31,7 +31,6 @@ const MONTHS = [
   "December",
 ];
 
-// Same fixed format used on the student page, so dates always match
 function formatDate(date: Date) {
   const [y, m, d] = date.toISOString().slice(0, 10).split("-");
   return `${d}/${m}/${y}`;
@@ -88,7 +87,6 @@ export default async function PaymentsPage({
       : {}),
   };
 
-  // "Collected this month" is by the date the money was received
   const now = new Date();
   const monthStart = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
