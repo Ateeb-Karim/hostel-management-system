@@ -36,6 +36,7 @@ export default async function WardenPage({
       user: true,
     },
   });
+  console.log("students data => ", JSON.stringify(students));
 
   const studentsWithStatus = students
     .map((student) => ({

@@ -5,41 +5,32 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-
-  if (session?.user?.role !== "WARDEN") {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!session || session.user.role !== "WARDEN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
-  const { studentId, amount, month, year } = body;
+  const { studentId, amount, month, year, datePaid } = await req.json();
 
-  if (!studentId || !amount || !month || !year) {
-    return NextResponse.json({ message: "Missing fields" }, { status: 400 });
-  }
-
-  if (amount <= 0) {
+  if (!studentId || !amount || !month || !year || !datePaid) {
     return NextResponse.json(
-      { message: "Amount must be positive" },
+      { error: "Missing required fields" },
       { status: 400 },
     );
   }
 
-  if (month < 1 || month > 12) {
-    return NextResponse.json({ message: "Invalid month" }, { status: 400 });
-  }
-
   const student = await prisma.student.findUnique({ where: { id: studentId } });
-
   if (!student) {
-    return NextResponse.json({ message: "Student not found" }, { status: 404 });
+    return NextResponse.json({ error: "Student not found" }, { status: 404 });
   }
 
   const payment = await prisma.payment.create({
     data: {
       studentId,
-      amount,
-      month,
-      year,
+      name: student.name,
+      amount: Number(amount),
+      month: Number(month),
+      year: Number(year),
+      datePaid: new Date(datePaid),
     },
   });
 

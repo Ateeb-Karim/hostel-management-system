@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../app/generated/prisma"
 }
 
@@ -16,9 +16,9 @@ enum Role {
 model User {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId
   loginId  String   @unique
+  name     String?
   password String
-  role     Role     @default(STUDENT)
-
+  role     Role
   student  Student?
 }
 
@@ -29,23 +29,20 @@ model Student {
   phone       String?
   monthlyRent Int
   joinDate    DateTime
-
   userId      String    @unique @db.ObjectId
   user        User      @relation(fields: [userId], references: [id])
-
   payments    Payment[]
 }
 
 model Payment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
   amount    Int
   month     Int
   year      Int
-  datePaid  DateTime @default(now())
-  createdAt DateTime @default(now())
-
+  datePaid  DateTime
   studentId String   @db.ObjectId
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
 }
