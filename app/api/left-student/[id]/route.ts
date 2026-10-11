@@ -27,6 +27,7 @@ export async function PATCH(
     const body = await req.json();
 
     const student = await prisma.student.findUnique({ where: { id } });
+    console.log(student);
     if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }

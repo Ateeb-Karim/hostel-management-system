@@ -5,12 +5,12 @@ import { redirect, notFound } from "next/navigation";
 import { calculateRentStatus, getMonthlyBreakdown } from "@/lib/rent";
 import {
   ArrowLeft,
-  User,
   Phone,
   CalendarDays,
   Wallet,
   Pencil,
   Receipt,
+  Info,
 } from "lucide-react";
 import AddPaymentForm from "@/app/components/addPaymentForm";
 import PaymentHistory from "@/app/components/paymentHistory";
@@ -32,6 +32,47 @@ const rowStyle: Record<string, { bg: string; text: string; dot: string }> = {
   unpaid: { bg: "bg-slate-50", text: "text-slate-500", dot: "bg-slate-300" },
 };
 
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+function formatDate(date: Date) {
+  const [y, m, d] = date.toISOString().slice(0, 10).split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function monthYear(date: Date) {
+  const [y, m] = date.toISOString().slice(0, 10).split("-");
+  return `${MONTHS[Number(m) - 1]} ${y}`;
+}
+
+function statusLabel(status: string) {
+  return status === "pending" ? "unpaid" : status;
+}
+
+function getInitials(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase() || "?"
+  );
+}
+
 export default async function StudentDetailPage({
   params,
 }: {
@@ -51,7 +92,7 @@ export default async function StudentDetailPage({
       payments: {
         orderBy: { datePaid: "desc" },
       },
-      user: true,
+      user: { select: { loginId: true } },
     },
   });
 
@@ -62,6 +103,8 @@ export default async function StudentDetailPage({
   const rentStatus = calculateRentStatus(student, student.payments);
   const monthlyBreakdown = getMonthlyBreakdown(student, student.payments);
 
+  const hasLeft = Boolean(student.leaveDate);
+
   const progress =
     rentStatus.totalDue > 0
       ? Math.min(
@@ -69,6 +112,8 @@ export default async function StudentDetailPage({
           Math.round((rentStatus.totalPaid / rentStatus.totalDue) * 100),
         )
       : 0;
+
+  const paidMonths = monthlyBreakdown.filter((r) => r.status === "paid").length;
 
   const paymentsForClient = student.payments.map((p) => ({
     id: p.id,
@@ -90,11 +135,12 @@ export default async function StudentDetailPage({
         </Link>
 
         <div className="flex flex-col gap-5 sm:gap-6">
+          {/* Header card */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100">
-                  <User size={28} className="text-slate-400" />
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg font-semibold text-slate-600">
+                  {getInitials(student.name)}
                 </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -107,8 +153,13 @@ export default async function StudentDetailPage({
                         "bg-slate-100 text-slate-600"
                       }`}
                     >
-                      {rentStatus.status}
+                      {statusLabel(rentStatus.status)}
                     </span>
+                    {hasLeft && (
+                      <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                        Left
+                      </span>
+                    )}
                   </div>
                   <p className="mt-0.5 wrap-break-word text-sm text-slate-500">
                     Room {student.roomNo} · {student.user.loginId}
@@ -122,7 +173,7 @@ export default async function StudentDetailPage({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-4 border-t border-slate-100 pt-4 sm:flex-col sm:items-end sm:border-0 sm:pt-0">
+              <div className="flex flex-col gap-4 border-t border-slate-100 pt-4 sm:items-end sm:border-0 sm:pt-0">
                 <div className="sm:text-right">
                   <p className="text-xs text-slate-400">Remaining</p>
                   <p
@@ -135,21 +186,24 @@ export default async function StudentDetailPage({
                     Rs. {rentStatus.remaining.toLocaleString()}
                   </p>
                 </div>
-                <MarkAsLeftButton
-                  studentId={student.id}
-                  studentName={student.name}
-                  joinDate={student.joinDate.toISOString()}
-                  leaveDate={
-                    student.leaveDate ? student.leaveDate.toISOString() : null
-                  }
-                />
-                <Link
-                  href={`/warden/student/${student.id}/edit`}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-                >
-                  <Pencil size={14} />
-                  Edit
-                </Link>
+
+                <div className="flex gap-2">
+                  <Link
+                    href={`/warden/student/${student.id}/edit`}
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-none"
+                  >
+                    <Pencil size={14} />
+                    Edit
+                  </Link>
+                  <MarkAsLeftButton
+                    studentId={student.id}
+                    studentName={student.name}
+                    joinDate={student.joinDate.toISOString()}
+                    leaveDate={
+                      student.leaveDate ? student.leaveDate.toISOString() : null
+                    }
+                  />
+                </div>
               </div>
             </div>
 
@@ -168,6 +222,20 @@ export default async function StudentDetailPage({
               </div>
             </div>
           </div>
+
+          {hasLeft && student.leaveDate && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              <Info size={18} className="mt-0.5 shrink-0" />
+              <p>
+                <span className="font-medium">
+                  Left on {formatDate(student.leaveDate)}.
+                </span>{" "}
+                Rent, dues and the month list stop after{" "}
+                {monthYear(student.leaveDate)}. Payments can still be recorded
+                so any remaining dues can be settled.
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
             <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -197,20 +265,24 @@ export default async function StudentDetailPage({
                 Joined
               </p>
               <p className="mt-1 text-lg font-semibold text-slate-900">
-                {student.joinDate.toLocaleDateString("en-GB")}
+                {formatDate(student.joinDate)}
               </p>
+              {hasLeft && student.leaveDate && (
+                <p className="text-xs text-slate-400">
+                  Left {formatDate(student.leaveDate)}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-2">
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                 <p className="text-sm font-medium text-slate-600">
                   Month-by-month status
                 </p>
                 <span className="text-xs text-slate-400">
-                  {monthlyBreakdown.length}{" "}
-                  {monthlyBreakdown.length === 1 ? "month" : "months"}
+                  {paidMonths} of {monthlyBreakdown.length} paid
                 </span>
               </div>
               <div className="flex max-h-96 flex-col gap-1.5 overflow-y-auto pr-1">

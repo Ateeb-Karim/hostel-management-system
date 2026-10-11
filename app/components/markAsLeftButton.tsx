@@ -27,14 +27,8 @@ const MONTHS = [
   "December",
 ];
 
-// Fixed formats from the ISO string, so server and browser always agree
-function formatDate(iso: string) {
-  const [y, m, d] = iso.slice(0, 10).split("-");
-  return `${d}/${m}/${y}`;
-}
-
-function monthYear(iso: string) {
-  const [y, m] = iso.slice(0, 10).split("-");
+function monthYear(isoOrDate: string) {
+  const [y, m] = isoOrDate.slice(0, 10).split("-");
   return `${MONTHS[Number(m) - 1]} ${y}`;
 }
 
@@ -45,9 +39,9 @@ function localToday() {
     .slice(0, 10);
 }
 
-// Same look as the Edit button on the student page
+// Same look as the Edit button next to it
 const actionButtonClass =
-  "inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 sm:w-auto";
+  "inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-none";
 
 export default function MarkAsLeftButton({
   studentId,
