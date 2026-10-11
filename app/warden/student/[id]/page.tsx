@@ -13,6 +13,7 @@ import {
   Receipt,
 } from "lucide-react";
 import AddPaymentForm from "@/app/components/addPaymentForm";
+import PaymentHistory from "@/app/components/paymentHistory";
 import Link from "next/link";
 import DeleteStudentButton from "@/app/components/deleteStudentBtn";
 
@@ -67,6 +68,14 @@ export default async function StudentDetailPage({
         )
       : 0;
 
+  const paymentsForClient = student.payments.map((p) => ({
+    id: p.id,
+    amount: p.amount,
+    month: p.month,
+    year: p.year,
+    datePaid: p.datePaid.toISOString(),
+  }));
+
   return (
     <main className="min-h-screen w-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
       <div className="mx-auto max-w-5xl">
@@ -79,7 +88,6 @@ export default async function StudentDetailPage({
         </Link>
 
         <div className="flex flex-col gap-5 sm:gap-6">
-          {/* Header card */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
@@ -246,39 +254,7 @@ export default async function StudentDetailPage({
                     {student.payments.length === 1 ? "payment" : "payments"}
                   </span>
                 </div>
-                <div className="flex max-h-64 flex-col gap-1.5 overflow-y-auto pr-1">
-                  {student.payments.length === 0 && (
-                    <p className="py-4 text-center text-sm text-slate-400">
-                      No payments recorded yet.
-                    </p>
-                  )}
-                  {student.payments.map((payment) => {
-                    const monthName = new Date(
-                      2000,
-                      payment.month - 1,
-                    ).toLocaleString("en-US", { month: "long" });
-
-                    return (
-                      <div
-                        key={payment.id}
-                        className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2.5"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-sm text-slate-700">
-                            For {monthName} {payment.year}
-                          </p>
-                          <p className="mt-0.5 text-xs text-slate-400">
-                            Paid on{" "}
-                            {payment.datePaid.toLocaleDateString("en-GB")}
-                          </p>
-                        </div>
-                        <span className="shrink-0 text-sm font-semibold text-slate-800">
-                          Rs. {payment.amount.toLocaleString()}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
+                <PaymentHistory payments={paymentsForClient} />
               </div>
             </div>
           </div>
