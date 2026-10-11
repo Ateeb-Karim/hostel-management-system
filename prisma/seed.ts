@@ -13,7 +13,7 @@ async function main() {
       password: wardenPassword,
       role: "WARDEN",
     },
-  }); 
+  });
 
   await prisma.user.upsert({
     where: { loginId: "aliraza" },
