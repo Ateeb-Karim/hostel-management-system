@@ -10,13 +10,11 @@ export default function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
   const [showCurrentPassword, setShowCurrentPassword] =
     useState<boolean>(false);
   const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
-  const [show, setShow] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
@@ -52,8 +50,11 @@ export default function ChangePasswordForm() {
       }
 
       setCurrentPassword("");
+      setShowCurrentPassword(false);
       setNewPassword("");
+      setShowNewPassword(false);
       setConfirmPassword("");
+      setShowConfirmPassword(false);
       setSuccess(true);
       setLoading(false);
     } catch {
@@ -61,8 +62,6 @@ export default function ChangePasswordForm() {
       setLoading(false);
     }
   }
-
-  const type = show ? "text" : "password";
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
