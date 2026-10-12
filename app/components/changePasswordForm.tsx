@@ -7,13 +7,19 @@ const inputClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200";
 
 export default function ChangePasswordForm() {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showCurrentPassword, setShowCurrentPassword] =
+    useState<boolean>(false);
+  const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<boolean>(false);
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
@@ -64,53 +70,73 @@ export default function ChangePasswordForm() {
         <label className="mb-1 block text-sm font-medium text-slate-600">
           Current password
         </label>
-        <input
-          type={type}
-          className={inputClass}
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          autoComplete="current-password"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showCurrentPassword ? "text" : "password"}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="Enter your current password"
+            required
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-10 text-sm text-black outline-none transition-all focus:ring-2 focus:ring-slate-900"
+          />
+          <button
+            type="button"
+            onClick={() => setShowCurrentPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label={showCurrentPassword ? "Hide password" : "Show password"}
+          >
+            {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-600">
-          New password
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Password
         </label>
-        <input
-          type={type}
-          className={inputClass}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          autoComplete="new-password"
-          placeholder="At least 8 characters"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showNewPassword ? "text" : "password"}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter your new password"
+            required
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-10 text-sm text-black outline-none transition-all focus:ring-2 focus:ring-slate-900"
+          />
+          <button
+            type="button"
+            onClick={() => setShowNewPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label={showNewPassword ? "Hide password" : "Show password"}
+          >
+            {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-600">
           Confirm new password
         </label>
-        <input
-          type={type}
-          className={inputClass}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          autoComplete="new-password"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm your new password"
+            required
+            className="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-10 text-sm text-black outline-none transition-all focus:ring-2 focus:ring-slate-900"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+          >
+            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
-
-      <button
-        type="button"
-        onClick={() => setShow((s) => !s)}
-        className="inline-flex w-fit items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800"
-      >
-        {show ? <EyeOff size={15} /> : <Eye size={15} />}
-        {show ? "Hide passwords" : "Show passwords"}
-      </button>
 
       {error && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">

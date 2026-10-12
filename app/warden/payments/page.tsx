@@ -31,6 +31,7 @@ const MONTHS = [
   "December",
 ];
 
+// Same fixed format used on the student page, so dates always match
 function formatDate(date: Date) {
   const [y, m, d] = date.toISOString().slice(0, 10).split("-");
   return `${d}/${m}/${y}`;
@@ -70,7 +71,15 @@ export default async function PaymentsPage({
       : undefined;
   const requestedPage = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
 
+  // Only count payments whose student still exists, so leftover records
+  // from manually deleted students can't break the page or the totals
+  const validStudents = await prisma.student.findMany({
+    select: { id: true },
+  });
+  const validStudentIds = validStudents.map((s) => s.id);
+
   const where = {
+    studentId: { in: validStudentIds },
     ...(month ? { month } : {}),
     ...(year ? { year } : {}),
     ...(q
@@ -87,6 +96,7 @@ export default async function PaymentsPage({
       : {}),
   };
 
+  // "Collected this month" is by the date the money was received
   const now = new Date();
   const monthStart = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
@@ -99,10 +109,14 @@ export default async function PaymentsPage({
     prisma.payment.count({ where }),
     prisma.payment.aggregate({ where, _sum: { amount: true } }),
     prisma.payment.aggregate({
-      where: { datePaid: { gte: monthStart, lt: nextMonthStart } },
+      where: {
+        studentId: { in: validStudentIds },
+        datePaid: { gte: monthStart, lt: nextMonthStart },
+      },
       _sum: { amount: true },
     }),
     prisma.payment.findMany({
+      where: { studentId: { in: validStudentIds } },
       select: { year: true },
       distinct: ["year"],
       orderBy: { year: "desc" },
@@ -160,6 +174,7 @@ export default async function PaymentsPage({
             </p>
           </div>
 
+          {/* Stat cards */}
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
             <div className="col-span-2 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-1">
               <p className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -190,6 +205,7 @@ export default async function PaymentsPage({
             </div>
           </div>
 
+          {/* Filters */}
           <form
             method="get"
             className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[1fr_180px_140px_auto]"
@@ -252,7 +268,9 @@ export default async function PaymentsPage({
             </div>
           </form>
 
+          {/* List */}
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            {/* Table header (desktop only) */}
             <div className="hidden grid-cols-5 gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-medium text-slate-500 md:grid">
               <p>Student</p>
               <p>Room no.</p>
@@ -280,6 +298,7 @@ export default async function PaymentsPage({
                 href={`/warden/student/${payment.student.id}`}
                 className="block border-b border-slate-100 transition last:border-0 hover:bg-slate-50"
               >
+                {/* Desktop row */}
                 <div className="hidden grid-cols-5 items-center gap-4 px-5 py-3 md:grid">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
@@ -303,6 +322,7 @@ export default async function PaymentsPage({
                   </p>
                 </div>
 
+                {/* Mobile card */}
                 <div className="flex items-center justify-between gap-3 p-4 md:hidden">
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100">

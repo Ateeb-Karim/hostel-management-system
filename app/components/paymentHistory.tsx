@@ -27,7 +27,6 @@ const MONTHS = [
   "December",
 ];
 
-// Fixed format from the ISO string, so server and browser always agree
 function formatDate(iso: string) {
   const [y, m, d] = iso.slice(0, 10).split("-");
   return `${d}/${m}/${y}`;
@@ -56,7 +55,7 @@ function PaymentRow({ payment }: { payment: Payment }) {
     setMode("view");
   }
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.SubmitEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
